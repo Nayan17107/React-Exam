@@ -70,7 +70,8 @@ export const getAllRoomsAsync = () => {
 
 export const addRoomAsync = (roomData) => {
     return async (dispatch) => {
-        dispatch(loadingRooms());
+        dispatch({ type: LOADING_ROOMS }); 
+
         try {
             const docRef = await addDoc(collection(db, "rooms"), {
                 ...roomData,
@@ -78,11 +79,22 @@ export const addRoomAsync = (roomData) => {
                 isAvailable: true
             });
 
-            const newRoom = { id: docRef.id, ...roomData };
-            dispatch(addRoom(newRoom));
+            const newRoom = {
+                id: docRef.id,
+                ...roomData
+            };
+
+            dispatch({
+                type: ADD_ROOM,
+                payload: newRoom
+            });
+
             return newRoom;
         } catch (error) {
-            dispatch(errorRooms(error.message));
+            dispatch({
+                type: ERROR_ROOMS,
+                payload: error.message
+            });
             throw error;
         }
     };

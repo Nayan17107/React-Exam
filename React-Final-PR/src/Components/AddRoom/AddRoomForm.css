@@ -1,0 +1,53 @@
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+.step-circle.active {
+    background: var(--primary);
+    color: white;
+}
+
+.step-circle.current {
+    box-shadow: 0 0 0 5px rgba(57, 73, 171, 0.2);
+    transform: scale(1.1);
+}
+
+.step-line {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    right: -50%;
+    height: 2px;
+    background: #e9ecef;
+    z-index: 0;
+}
+
+.step-line.active {
+    background: var(--primary);
+}
+
+.resize-none {
+    resize: none;
+}
+
+@media (max-width: 768px) {
+    .step-label {
+        font-size: 0.7rem;
+    }
+
+    .step-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+    }
+}

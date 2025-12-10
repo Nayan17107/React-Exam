@@ -1,5 +1,5 @@
 import React from 'react';
-import EditRoom from '../EditRoom/EditRoom';
+import EditRoom from '../EditRoom/EditRoomForm';
 
 const EditRoomPage = () => {
     return <EditRoom />;
