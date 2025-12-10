@@ -9,7 +9,6 @@ const RoomDetails = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // Get room from Redux store
     const { room, isLoading, errorMsg } = useSelector(state => state.rooms);
 
     // Fetch room details on component mount

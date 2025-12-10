@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { Form, Button, Alert, Spinner, Card, Badge, Row, Col } from 'react-bootstrap';
 import { getRoomAsync, updateRoomAsync } from '../../Services/Actions/RoomActions';
 
 const EditRoom = () => {
@@ -22,92 +22,93 @@ const EditRoom = () => {
     });
 
     const [newAmenity, setNewAmenity] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const roomTypes = ['Single', 'Double', 'Suite', 'Deluxe', 'Family'];
 
-    // Fetch room data when component mounts
+    // Fetch room data
     useEffect(() => {
         if (id) {
             dispatch(getRoomAsync(id));
         }
     }, [dispatch, id]);
 
-    // Update form data when room is loaded
+    // Update form when room loads
     useEffect(() => {
         if (room) {
+            console.log("Room data loaded:", room);
             setFormData({
                 roomNumber: room.roomNumber || '',
                 type: room.type || 'Single',
-                price: room.price || '',
+                price: room.price ? room.price.toString() : '',
                 maxGuests: room.maxGuests || 1,
-                amenities: room.amenities || [],
+                amenities: Array.isArray(room.amenities) ? room.amenities : [],
                 description: room.description || '',
                 isAvailable: room.isAvailable !== undefined ? room.isAvailable : true
             });
         }
     }, [room]);
 
-    // Handle form input changes
     const handleChange = (e) => {
-        const { name, value, type } = e.target;
+        const { name, value, type, checked } = e.target;
 
-        if (type === 'checkbox') {
-            setFormData({
-                ...formData,
-                [name]: e.target.checked
-            });
-        } else if (name === 'price' || name === 'maxGuests') {
-            setFormData({
-                ...formData,
-                [name]: value === '' ? '' : parseFloat(value)
-            });
-        } else {
-            setFormData({
-                ...formData,
-                [name]: value
-            });
-        }
+        setFormData(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked :
+                (name === 'price' || name === 'maxGuests') ?
+                    (value === '' ? '' : name === 'price' ? parseFloat(value) : parseInt(value)) :
+                    value
+        }));
     };
 
-    // Add new amenity
     const handleAddAmenity = () => {
         if (newAmenity.trim() && !formData.amenities.includes(newAmenity.trim())) {
-            setFormData({
-                ...formData,
-                amenities: [...formData.amenities, newAmenity.trim()]
-            });
+            setFormData(prev => ({
+                ...prev,
+                amenities: [...prev.amenities, newAmenity.trim()]
+            }));
             setNewAmenity('');
         }
     };
 
-    // Remove amenity
     const handleRemoveAmenity = (amenity) => {
-        setFormData({
-            ...formData,
-            amenities: formData.amenities.filter(a => a !== amenity)
-        });
+        setFormData(prev => ({
+            ...prev,
+            amenities: prev.amenities.filter(a => a !== amenity)
+        }));
     };
 
-    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate form data
         if (!formData.roomNumber || !formData.price) {
             alert('Please fill in all required fields');
             return;
         }
 
-        const roomData = {
-            ...formData,
-            price: parseFloat(formData.price)
-        };
+        setIsSubmitting(true);
 
         try {
+            const roomData = {
+                roomNumber: formData.roomNumber,
+                type: formData.type,
+                price: parseFloat(formData.price),
+                maxGuests: parseInt(formData.maxGuests),
+                amenities: formData.amenities,
+                description: formData.description,
+                isAvailable: formData.isAvailable
+            };
+
+            console.log("Updating room with data:", roomData);
+
             await dispatch(updateRoomAsync(id, roomData));
             alert('Room updated successfully!');
             navigate(`/rooms/${id}`);
         } catch (error) {
+            console.error("Update error:", error);
             alert('Error updating room: ' + error.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -121,9 +122,9 @@ const EditRoom = () => {
     }
 
     return (
-        <div>
+        <div className="edit-room-container">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Edit Room: {room?.roomNumber}</h2>
+                <h2>Edit Room: {room?.roomNumber || 'Loading...'}</h2>
                 <Button variant="outline-secondary" onClick={() => navigate(`/rooms/${id}`)}>
                     ← Back to Room
                 </Button>
@@ -134,35 +135,41 @@ const EditRoom = () => {
                     {errorMsg && <Alert variant="danger">{errorMsg}</Alert>}
 
                     <Form onSubmit={handleSubmit}>
-                        <h4 className="mb-3">Edit Room Information</h4>
+                        <Row>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Room Number *</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        name="roomNumber"
+                                        value={formData.roomNumber}
+                                        onChange={handleChange}
+                                        required
+                                        disabled={isSubmitting}
+                                    />
+                                </Form.Group>
+                            </Col>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Room Number *</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="roomNumber"
-                                value={formData.roomNumber}
-                                onChange={handleChange}
-                                required
-                            />
-                        </Form.Group>
+                            <Col md={6}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Room Type *</Form.Label>
+                                    <Form.Select
+                                        name="type"
+                                        value={formData.type}
+                                        onChange={handleChange}
+                                        required
+                                        disabled={isSubmitting}
+                                    >
+                                        {roomTypes.map(type => (
+                                            <option key={type} value={type}>{type}</option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                        </Row>
 
-                        <Form.Group className="mb-3">
-                            <Form.Label>Room Type *</Form.Label>
-                            <Form.Select
-                                name="type"
-                                value={formData.type}
-                                onChange={handleChange}
-                                required
-                            >
-                                {roomTypes.map(type => (
-                                    <option key={type} value={type}>{type}</option>
-                                ))}
-                            </Form.Select>
-                        </Form.Group>
-
-                        <div className="row">
-                            <div className="col-md-6">
+                        <Row>
+                            <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Price per Night ($) *</Form.Label>
                                     <Form.Control
@@ -173,10 +180,12 @@ const EditRoom = () => {
                                         required
                                         min="0"
                                         step="0.01"
+                                        disabled={isSubmitting}
                                     />
                                 </Form.Group>
-                            </div>
-                            <div className="col-md-6">
+                            </Col>
+
+                            <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Maximum Guests *</Form.Label>
                                     <Form.Control
@@ -187,10 +196,11 @@ const EditRoom = () => {
                                         required
                                         min="1"
                                         max="10"
+                                        disabled={isSubmitting}
                                     />
                                 </Form.Group>
-                            </div>
-                        </div>
+                            </Col>
+                        </Row>
 
                         <Form.Group className="mb-3">
                             <Form.Label>Amenities</Form.Label>
@@ -199,13 +209,15 @@ const EditRoom = () => {
                                     type="text"
                                     value={newAmenity}
                                     onChange={(e) => setNewAmenity(e.target.value)}
-                                    placeholder="Add amenity (e.g., WiFi, TV, AC)"
                                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddAmenity())}
+                                    placeholder="Add amenity (e.g., WiFi, TV, AC)"
+                                    disabled={isSubmitting}
                                 />
                                 <Button
                                     variant="outline-secondary"
                                     onClick={handleAddAmenity}
                                     className="ms-2"
+                                    disabled={isSubmitting}
                                 >
                                     Add
                                 </Button>
@@ -221,6 +233,7 @@ const EditRoom = () => {
                                                 className="text-white p-0 ms-2"
                                                 onClick={() => handleRemoveAmenity(amenity)}
                                                 style={{ fontSize: '12px' }}
+                                                disabled={isSubmitting}
                                             >
                                                 ×
                                             </Button>
@@ -239,36 +252,46 @@ const EditRoom = () => {
                                 value={formData.description}
                                 onChange={handleChange}
                                 placeholder="Room description, features, etc."
+                                disabled={isSubmitting}
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3">
+                        <Form.Group className="mb-4">
                             <Form.Check
                                 type="switch"
                                 id="availability-switch"
-                                label="Room Available for Booking"
+                                label={
+                                    <>
+                                        Room Available for Booking
+                                        <Badge bg={formData.isAvailable ? "success" : "danger"} className="ms-2">
+                                            {formData.isAvailable ? "Available" : "Booked"}
+                                        </Badge>
+                                    </>
+                                }
                                 name="isAvailable"
                                 checked={formData.isAvailable}
                                 onChange={handleChange}
+                                disabled={isSubmitting}
                             />
                         </Form.Group>
 
-                        <div className="d-flex justify-content-between mt-4">
+                        <div className="d-flex justify-content-between">
                             <Button
                                 variant="secondary"
                                 onClick={() => navigate(`/rooms/${id}`)}
-                                disabled={isLoading}
+                                disabled={isSubmitting}
                             >
                                 Cancel
                             </Button>
                             <Button
                                 type="submit"
                                 variant="primary"
-                                disabled={isLoading}
+                                disabled={isSubmitting || isLoading}
                             >
-                                {isLoading ? (
+                                {isSubmitting ? (
                                     <>
-                                        <Spinner animation="border" size="sm" /> Updating...
+                                        <Spinner animation="border" size="sm" className="me-2" />
+                                        Updating...
                                     </>
                                 ) : (
                                     'Update Room'
