@@ -1,8 +1,24 @@
+// import { configureStore } from '@reduxjs/toolkit';
+// import rootReducer from './src/Services/Reducer/index';
+
+// export const store = configureStore({
+//     reducer: rootReducer,
+//     middleware: (getDefaultMiddleware) =>
+//         getDefaultMiddleware({
+//             serializableCheck: false
+//         })
+// });
 import { configureStore } from '@reduxjs/toolkit';
-import rootReducer from './src/Services/Reducer/index';
+import roomReducer from './src/Services/Reducer/RoomReducer';
+import reservationReducer from './src/Services/Reducer/ReservationReducer';
+import authReducer from './src/Services/Reducer/';
 
 export const store = configureStore({
-    reducer: rootReducer,
+    reducer: {
+        rooms: roomReducer,
+        reservations: reservationReducer,
+        auth: authReducer
+    },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
             serializableCheck: false
