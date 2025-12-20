@@ -30,6 +30,7 @@ body {
     color: #333;
     background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
     min-height: 100vh;
+    padding-top: 80px !important;
 }
 
 /* ===== UTILITY CLASSES ===== */
@@ -357,6 +358,33 @@ body {
     .login-page,
     .register-page {
         padding: 0.5rem;
+        padding-top: 70px;
+    }
+}
+
+.navbar-fixed-spacer {
+    padding-top: 80px;
+}
+
+.app-container {
+    padding-top: 80px;
+}
+
+.main-content {
+    padding-top: 80px;
+}
+
+.page-container {
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-top: 70px !important;
+    }
+
+    .app-container,
+    .main-content {
         padding-top: 70px;
     }
 }

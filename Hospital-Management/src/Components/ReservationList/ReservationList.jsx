@@ -163,7 +163,6 @@ const ReservationList = () => {
             {/* Header Section */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
                 <div>
-                    <h1 className="fw-bold mb-2">Reservation Management</h1>
                     <p className="text-muted mb-0">
                         Manage all hotel bookings and guest reservations
                     </p>
