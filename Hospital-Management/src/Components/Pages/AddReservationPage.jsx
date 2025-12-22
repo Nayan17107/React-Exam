@@ -5,7 +5,7 @@ import ReservationForm from '../ReservationForm/ReservationForm';
 const AddReservationPage = () => {
     return (
         <div>
-            <h1 className="mb-4">Create New Reservation</h1>
+            {/* <h1 className="mb-4">Create New Reservation</h1> */}
             <Card>
                 <Card.Body>
                     <ReservationForm />

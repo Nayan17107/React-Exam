@@ -13,7 +13,8 @@ import {
     Col,
     Modal,
     Dropdown,
-    ProgressBar
+    ProgressBar,
+    Container
 } from 'react-bootstrap';
 import {
     FaCalendarPlus,
@@ -41,6 +42,8 @@ const ReservationList = () => {
     const [activeTab, setActiveTab] = useState('all');
     const { reservations, isLoading, errorMsg } = useSelector(state => state.reservations);
     const { rooms } = useSelector(state => state.rooms);
+    const { user } = useSelector(state => state.auth);
+    const isAdmin = user?.role === 'admin';
 
     useEffect(() => {
         dispatch(getAllReservationsAsync());
@@ -49,15 +52,15 @@ const ReservationList = () => {
 
     const filteredReservations = reservations.filter(res => {
         const checkInDate = new Date(res.checkIn);
-        const today = new Date();
 
         switch (activeTab) {
             case 'upcoming':
                 return isFuture(checkInDate) || isToday(checkInDate);
-            case 'active':
+            case 'active': {
                 const checkOutDate = new Date(res.checkOut);
                 return (isPast(checkInDate) || isToday(checkInDate)) &&
                     (isFuture(checkOutDate) || isToday(checkOutDate));
+            }
             case 'past':
                 return isPast(new Date(res.checkOut));
             case 'cancelled':
@@ -159,8 +162,9 @@ const ReservationList = () => {
     }
 
     return (
-        <div className="reservation-list-container">
+        <Container className="reservation-list-container">
             {/* Header Section */}
+            <h1 className="mb-3 fw-bold display-5 mt-5">Reservation Management</h1>
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
                 <div>
                     <p className="text-muted mb-0">
@@ -255,8 +259,8 @@ const ReservationList = () => {
                                 key={tab}
                                 variant="link"
                                 className={`text-decoration-none px-4 py-3 rounded-0 flex-grow-1 ${activeTab === tab
-                                        ? 'text-primary border-bottom-2 border-primary fw-bold'
-                                        : 'text-muted'
+                                    ? 'text-primary border-bottom-2 border-primary fw-bold'
+                                    : 'text-muted'
                                     }`}
                                 onClick={() => setActiveTab(tab)}
                             >
@@ -354,7 +358,7 @@ const ReservationList = () => {
                                                     </div>
                                                     <div>
                                                         <div className="fw-bold">{res.guestName}</div>
-                                                        <small className="text-muted">{res.guestEmail}</small>
+                                                        <small className="text-muted">{isAdmin ? res.guestEmail : (res.guestEmail ? res.guestEmail.replace(/(.{3}).+(@.+)/, '$1***$2') : '')}</small>
                                                     </div>
                                                 </div>
                                             </td>
@@ -540,7 +544,7 @@ const ReservationList = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
+        </Container>
     );
 };
 

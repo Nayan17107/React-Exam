@@ -34,12 +34,12 @@ const CustomNavbar = () => {
         { path: '/reservations', label: 'Reservations', badge: activeReservations },
     ];
 
+    // Authenticated user links (keep minimal for admins — Admin actions are in the right-side dropdown)
     const authNavItems = isAuthenticated
         ? [
-            { path: '/dashboard', label: 'Dashboard' },
             { path: '/profile', label: 'Profile' }
         ]
-        : [];
+        : []; 
 
     const allNavItems = [...navItems, ...authNavItems];
 
@@ -128,26 +128,47 @@ const CustomNavbar = () => {
                     </Nav>
 
                     {/* Authentication Section */}
-                    <div className="d-flex align-items-center">
-                        {/* Book Now Button - Always Visible */}
-                        <Button
-                            variant="warning"
-                            className="fw-bold px-4 me-3"
-                            onClick={() => {
-                                setExpanded(false);
-                                navigate('/reservations/new');
-                            }}
-                            style={{
-                                background: 'linear-gradient(135deg, #ff9800, #ff5722)',
-                                border: 'none',
-                                boxShadow: '0 4px 15px rgba(255, 152, 0, 0.3)'
-                            }}
-                        >
-                            <FaCalendarAlt className="me-2" />
-                            Book Now
-                        </Button>
+                    <div className="d-flex align-items-center" style={{ gap: '0.5rem' }} >
+                        {/* Book Now Button - hidden for admins */}
+                        {user?.role !== 'admin' && (
+                            <Button
+                                variant="warning"
+                                className="fw-bold px-4 me-3"
+                                onClick={() => {
+                                    setExpanded(false);
+                                    navigate('/reservations/new');
+                                }}
+                                style={{
+                                    background: 'linear-gradient(135deg, #ff9800, #ff5722)',
+                                    border: 'none',
+                                    boxShadow: '0 4px 15px rgba(255, 152, 0, 0.3)'
+                                }}
+                            >
+                                <FaCalendarAlt className="me-2" />
+                                Book Now
+                            </Button>
+                        )}
 
                         {/* User Authentication Area */}
+
+                        {/* Admin quick menu */}
+                        {user?.role === 'admin' && (
+                            <Dropdown align="end" className="me-2 admin-dd">
+                                <Dropdown.Toggle as={Button} variant="light" size="sm" className="d-flex align-items-center rounded-pill px-3 py-1 border-0">
+                                    <FaCog className="me-2" />
+                                    Admin
+                                </Dropdown.Toggle>
+
+                                <Dropdown.Menu className="shadow-sm rounded border" style={{ minWidth: 180 }}>
+                                    <Dropdown.Item as={Link} to="/admin" onClick={() => setExpanded(false)}>Overview</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                    <Dropdown.Item as={Link} to="/admin/rooms" onClick={() => setExpanded(false)}>Manage Rooms</Dropdown.Item>
+                                    <Dropdown.Item as={Link} to="/admin/reservations" onClick={() => setExpanded(false)}>Manage Reservations</Dropdown.Item>
+                                    <Dropdown.Item as={Link} to="/admin/users" onClick={() => setExpanded(false)}>Manage Users</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        )}
+
                         {isAuthenticated ? (
                             // Logged In User Dropdown
                             <Dropdown align="end">
@@ -191,11 +212,6 @@ const CustomNavbar = () => {
                                     <Dropdown.Item as={Link} to="/profile" onClick={() => setExpanded(false)}>
                                         <FaUserCircle className="me-2 text-primary" />
                                         My Profile
-                                    </Dropdown.Item>
-
-                                    <Dropdown.Item as={Link} to="/dashboard" onClick={() => setExpanded(false)}>
-                                        <FaCog className="me-2 text-secondary" />
-                                        Dashboard
                                     </Dropdown.Item>
 
                                     <Dropdown.Item as={Link} to="/reservations" onClick={() => setExpanded(false)}>

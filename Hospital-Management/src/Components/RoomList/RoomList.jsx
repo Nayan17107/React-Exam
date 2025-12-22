@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllRoomsAsync } from '../../Services/Actions/RoomActions';
 import RoomCard from '../RoomCard/RoomCard';
@@ -10,9 +10,7 @@ const RoomList = () => {
     const dispatch = useDispatch();
     const { rooms, isLoading, errorMsg } = useSelector(state => state.rooms);
 
-    useEffect(() => {
-        dispatch(getAllRoomsAsync());
-    }, [dispatch]);
+    // Data should be fetched by parent page (RoomsPage); avoid duplicate calls here.
 
     const availableRooms = rooms?.filter(room => room.isAvailable)?.length || 0;
     const bookedRooms = rooms?.filter(room => !room.isAvailable)?.length || 0;

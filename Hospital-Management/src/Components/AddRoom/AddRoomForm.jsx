@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -11,7 +11,8 @@ import {
     Col,
     InputGroup,
     Badge,
-    ProgressBar
+    ProgressBar,
+    Container
 } from 'react-bootstrap';
 import { addRoomAsync } from '../../Services/Actions/RoomActions';
 import {
@@ -37,6 +38,14 @@ const AddRoomForm = () => {
     const dispatch = useDispatch();
 
     const { isLoading, errorMsg } = useSelector(state => state.rooms);
+    const { user, isAuthenticated } = useSelector(state => state.auth);
+
+    // Prevent non-admin access to this form (defense-in-depth)
+    useEffect(() => {
+        if (!isAuthenticated || user?.role !== 'admin') {
+            navigate('/');
+        }
+    }, [isAuthenticated, user, navigate]);
 
     const [formData, setFormData] = useState({
         roomNumber: '',
@@ -159,10 +168,16 @@ const AddRoomForm = () => {
         };
 
         try {
+            // Ensure only admin can perform this action
+            if (!user || user.role !== 'admin') {
+                throw new Error('Unauthorized: only admins can add rooms');
+            }
+
             await dispatch(addRoomAsync(roomData));
             navigate('/rooms');
         } catch (error) {
             console.error('Add room error:', error);
+            setValidationErrors(prev => ({ ...prev, global: error.message }));
         }
     };
 
@@ -176,7 +191,7 @@ const AddRoomForm = () => {
     };
 
     return (
-        <div className="add-room-form-container">
+        <Container className="add-room-form-container">
             {/* Progress Steps */}
             <Card className="border-0 shadow-sm mb-4">
                 <Card.Body className="p-4">
@@ -211,6 +226,12 @@ const AddRoomForm = () => {
                         Error Adding Room
                     </Alert.Heading>
                     <p className="mb-0">{errorMsg}</p>
+                </Alert>
+            )}
+
+            {validationErrors.global && (
+                <Alert variant="danger" className="border-0 shadow-sm mb-4">
+                    <p className="mb-0">{validationErrors.global}</p>
                 </Alert>
             )}
 
@@ -576,7 +597,7 @@ const AddRoomForm = () => {
                     )}
                 </div>
             </Form>
-        </div>
+        </Container>
     );
 };
 

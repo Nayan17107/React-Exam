@@ -73,6 +73,18 @@ export const addRoomAsync = (roomData) => {
         dispatch({ type: LOADING_ROOMS }); 
 
         try {
+            // Basic client-side authorization check using stored user info
+            let storedUser = null;
+            try {
+                storedUser = JSON.parse(localStorage.getItem('luxurystay_user'));
+            } catch {
+                // ignore
+            }
+
+            if (!storedUser || storedUser.role !== 'admin') {
+                throw new Error('Unauthorized: only admins can add rooms');
+            }
+
             const docRef = await addDoc(collection(db, "rooms"), {
                 ...roomData,
                 createdAt: new Date().toISOString(),

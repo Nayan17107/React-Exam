@@ -13,7 +13,8 @@ import {
     InputGroup,
     ProgressBar,
     Tabs,
-    Tab
+    Tab,
+    Container
 } from 'react-bootstrap';
 import { getRoomAsync, updateRoomAsync } from '../../Services/Actions/RoomActions';
 import {
@@ -42,6 +43,7 @@ const EditRoomForm = () => {
     const dispatch = useDispatch();
 
     const { room, isLoading, errorMsg } = useSelector(state => state.rooms);
+    const { user, isAuthenticated } = useSelector(state => state.auth);
 
     const [formData, setFormData] = useState({
         roomNumber: '',
@@ -52,6 +54,14 @@ const EditRoomForm = () => {
         description: '',
         isAvailable: true
     });
+
+    // Redirect non-admins away (defense-in-depth)
+    useEffect(() => {
+        if (!isAuthenticated || user?.role !== 'admin') {
+            // using navigate from react-router
+            navigate('/');
+        }
+    }, [isAuthenticated, user, navigate]);
 
     const [newAmenity, setNewAmenity] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,7 +203,7 @@ const EditRoomForm = () => {
     }
 
     return (
-        <div className="edit-room-form-container">
+        <Container className="edit-room-form-container">
             {errorMsg && (
                 <Alert variant="danger" className="border-0 shadow-sm mb-4">
                     <Alert.Heading className="d-flex align-items-center">
@@ -645,7 +655,7 @@ const EditRoomForm = () => {
                     </Form>
                 </>
             )}
-        </div>
+        </Container>
     );
 };
 

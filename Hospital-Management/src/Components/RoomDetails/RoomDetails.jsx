@@ -14,7 +14,8 @@ import {
     Tabs,
     Tab,
     Carousel,
-    Modal
+    Modal,
+    Container
 } from 'react-bootstrap';
 import {
     FaBed,
@@ -52,6 +53,7 @@ const RoomDetails = () => {
     const dispatch = useDispatch();
 
     const { room, isLoading, errorMsg } = useSelector(state => state.rooms);
+    const { user } = useSelector(state => state.auth);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [activeTab, setActiveTab] = React.useState('details');
 
@@ -141,7 +143,7 @@ const RoomDetails = () => {
     }
 
     return (
-        <div className="room-details-container">
+        <Container className="room-details-container">
             {/* Breadcrumb */}
             <nav aria-label="breadcrumb" className="mb-4">
                 <ol className="breadcrumb bg-light p-3 rounded">
@@ -435,14 +437,27 @@ const RoomDetails = () => {
                         </Card.Header>
                         <Card.Body className="p-0">
                             <div className="d-grid gap-2 p-3">
-                                <Button
-                                    variant="outline-primary"
-                                    onClick={handleEdit}
-                                    className="d-flex align-items-center justify-content-center py-3"
-                                >
-                                    <FaEdit className="me-2" />
-                                    Edit Room Details
-                                </Button>
+                                {user?.role === 'admin' && (
+                                    <>
+                                        <Button
+                                            variant="outline-primary"
+                                            onClick={handleEdit}
+                                            className="d-flex align-items-center justify-content-center py-3"
+                                        >
+                                            <FaEdit className="me-2" />
+                                            Edit Room Details
+                                        </Button>
+
+                                        <Button
+                                            variant="outline-danger"
+                                            onClick={handleDelete}
+                                            className="d-flex align-items-center justify-content-center py-3"
+                                        >
+                                            <FaTrash className="me-2" />
+                                            Delete Room
+                                        </Button>
+                                    </>
+                                )}
 
                                 <Button
                                     variant="outline-success"
@@ -452,15 +467,6 @@ const RoomDetails = () => {
                                 >
                                     <FaCalendarPlus className="me-2" />
                                     Create Reservation
-                                </Button>
-
-                                <Button
-                                    variant="outline-danger"
-                                    onClick={handleDelete}
-                                    className="d-flex align-items-center justify-content-center py-3"
-                                >
-                                    <FaTrash className="me-2" />
-                                    Delete Room
                                 </Button>
 
                                 <Button
@@ -475,42 +481,44 @@ const RoomDetails = () => {
                         </Card.Body>
                     </Card>
 
-                    {/* Price Breakdown */}
-                    <Card className="border-0 shadow-sm">
-                        <Card.Header className="bg-success text-white border-0 py-3">
-                            <h5 className="mb-0 d-flex align-items-center">
-                                <FaHotel className="me-2" />
-                                Price Breakdown
-                            </h5>
-                        </Card.Header>
-                        <Card.Body>
-                            <ListGroup variant="flush">
-                                <ListGroup.Item className="d-flex justify-content-between border-0 py-3">
-                                    <span>Room per night</span>
-                                    <strong>${room.price}</strong>
-                                </ListGroup.Item>
-                                <ListGroup.Item className="d-flex justify-content-between border-0 py-3">
-                                    <span>Service fee</span>
-                                    <strong>${(room.price * 0.1).toFixed(2)}</strong>
-                                </ListGroup.Item>
-                                <ListGroup.Item className="d-flex justify-content-between border-0 py-3">
-                                    <span>Taxes</span>
-                                    <strong>${(room.price * 0.18).toFixed(2)}</strong>
-                                </ListGroup.Item>
-                                <ListGroup.Item className="d-flex justify-content-between border-0 py-3 bg-light">
-                                    <span className="fw-bold">Total per night</span>
-                                    <strong className="text-success fs-5">
-                                        ${(room.price * 1.28).toFixed(2)}
-                                    </strong>
-                                </ListGroup.Item>
-                            </ListGroup>
-                            <div className="mt-3 text-center">
-                                <small className="text-muted">
-                                    *Prices include all taxes and service charges
-                                </small>
-                            </div>
-                        </Card.Body>
-                    </Card>
+                    {/* Price Breakdown - visible to admins only */}
+                    {user?.role === 'admin' && (
+                        <Card className="border-0 shadow-sm">
+                            <Card.Header className="bg-success text-white border-0 py-3">
+                                <h5 className="mb-0 d-flex align-items-center">
+                                    <FaHotel className="me-2" />
+                                    Price Breakdown
+                                </h5>
+                            </Card.Header>
+                            <Card.Body>
+                                <ListGroup variant="flush">
+                                    <ListGroup.Item className="d-flex justify-content-between border-0 py-3">
+                                        <span>Room per night</span>
+                                        <strong>${room.price}</strong>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item className="d-flex justify-content-between border-0 py-3">
+                                        <span>Service fee</span>
+                                        <strong>${(room.price * 0.1).toFixed(2)}</strong>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item className="d-flex justify-content-between border-0 py-3">
+                                        <span>Taxes</span>
+                                        <strong>${(room.price * 0.18).toFixed(2)}</strong>
+                                    </ListGroup.Item>
+                                    <ListGroup.Item className="d-flex justify-content-between border-0 py-3 bg-light">
+                                        <span className="fw-bold">Total per night</span>
+                                        <strong className="text-success fs-5">
+                                            ${(room.price * 1.28).toFixed(2)}
+                                        </strong>
+                                    </ListGroup.Item>
+                                </ListGroup>
+                                <div className="mt-3 text-center">
+                                    <small className="text-muted">
+                                        *Prices include all taxes and service charges
+                                    </small>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    )}
                 </Col>
             </Row>
 
@@ -546,7 +554,7 @@ const RoomDetails = () => {
                     </Button>
                 </Modal.Footer>
             </Modal>
-        </div>
+        </Container>
     );
 };
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllRoomsAsync } from '../../Services/Actions/RoomActions';
@@ -9,14 +9,11 @@ import { Link } from 'react-router-dom';
 const Rooms = () => {
     const dispatch = useDispatch();
     const { rooms = [], isLoading, errorMsg } = useSelector(state => state.rooms);
-    const [initialLoad, setInitialLoad] = useState(true);
-
+    const { user, isAuthenticated } = useSelector(state => state.auth);
     useEffect(() => {
-        if (initialLoad) {
-            dispatch(getAllRoomsAsync());
-            setInitialLoad(false);
-        }
-    }, [dispatch, initialLoad]);
+        // load rooms on mount
+        dispatch(getAllRoomsAsync());
+    }, [dispatch]);
 
     const handleRefresh = () => {
         dispatch(getAllRoomsAsync());
@@ -30,12 +27,12 @@ const Rooms = () => {
     const showEmptyState = !isLoading && rooms.length === 0 && !errorMsg;
 
     return (
-        <div className="rooms-page">
+        <Container className="rooms-page mt-5">
             {/* Page Header with Stats */}
             <div className="mb-5">
                 <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
                     <div>
-                        <h1 className="fw-bold display-5 mb-2">Room Management</h1>
+                        <h1 className="fw-bold display-5 mb-4">Room Management</h1>
                         <p className="text-muted mb-0">
                             Manage and view all hotel rooms in one place
                         </p>
@@ -50,16 +47,18 @@ const Rooms = () => {
                             <FaSync className={`me-2 ${isLoading ? 'fa-spin' : ''}`} />
                             Refresh
                         </Button>
-                        <Button
-                            as={Link}
-                            to="/rooms/add"
-                            variant="primary"
-                            size="lg"
-                            className="px-4 py-2 shadow"
-                        >
-                            <FaPlus className="me-2" />
-                            Add New Room
-                        </Button>
+                        {isAuthenticated && user?.role === 'admin' && (
+                            <Button
+                                as={Link}
+                                to="/rooms/add"
+                                variant="primary"
+                                size="lg"
+                                className="px-4 py-2 shadow"
+                            >
+                                <FaPlus className="me-2" />
+                                Add New Room
+                            </Button>
+                        )} 
                     </div>
                 </div>
 
@@ -149,15 +148,17 @@ const Rooms = () => {
                                 </p>
                             </div>
                             <div className="d-flex gap-2 mt-3 mt-sm-0">
-                                <Button
-                                    as={Link}
-                                    to="/rooms/add"
-                                    variant="outline-primary"
-                                    disabled={isLoading}
-                                >
-                                    <FaPlus className="me-2" />
-                                    Add Room
-                                </Button>
+                                {user?.role === 'admin' && (
+                                    <Button
+                                        as={Link}
+                                        to="/rooms/add"
+                                        variant="outline-primary"
+                                        disabled={isLoading}
+                                    >
+                                        <FaPlus className="me-2" />
+                                        Add Room
+                                    </Button>
+                                )}
                                 {!isLoading && availableRooms > 0 && (
                                     <Badge bg="success" className="px-3 py-2 align-self-center">
                                         {availableRooms} {availableRooms === 1 ? 'room' : 'rooms'} ready to book
@@ -195,15 +196,19 @@ const Rooms = () => {
                         <Card.Body className="text-center py-5">
                             <h4 className="text-muted mb-3">No Rooms Found</h4>
                             <p className="mb-4">Add your first room to get started!</p>
-                            <Button
-                                as={Link}
-                                to="/rooms/add"
-                                variant="primary"
-                                size="lg"
-                            >
-                                <FaPlus className="me-2" />
-                                Add Your First Room
-                            </Button>
+                            {isAuthenticated && user?.role === 'admin' ? (
+                                <Button
+                                    as={Link}
+                                    to="/rooms/add"
+                                    variant="primary"
+                                    size="lg"
+                                >
+                                    <FaPlus className="me-2" />
+                                    Add Your First Room
+                                </Button>
+                            ) : (
+                                <Button as={Link} to="/register" variant="outline-primary">Create Admin Account</Button>
+                            )}
                         </Card.Body>
                     </Card>
                 ) : (
@@ -226,7 +231,7 @@ const Rooms = () => {
                     </>
                 )}
             </div>
-        </div>
+        </Container>
     );
 };
 

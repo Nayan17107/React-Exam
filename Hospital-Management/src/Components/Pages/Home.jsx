@@ -20,7 +20,7 @@ const Home = () => {
     const roomTypes = ['Single', 'Double', 'Suite', 'Deluxe'];
 
     return (
-        <div className="home-page">
+        <Container className="home-page mt-5">
             {/* Hero Section */}
             <section className="mb-5">
                 <div
@@ -225,7 +225,7 @@ const Home = () => {
                     </Container>
                 </div>
             </section>
-        </div>
+        </Container>
     );
 };
 

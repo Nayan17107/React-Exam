@@ -1,0 +1,78 @@
+.room-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.room-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.room-status-ribbon {
+    position: absolute;
+    top: 15px;
+    right: -35px;
+    background: #4caf50;
+    color: white;
+    padding: 5px 40px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transform: rotate(45deg);
+    z-index: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.room-status-ribbon.booked {
+    background: #f44336;
+}
+
+.room-status-ribbon.available {
+    background: #4caf50;
+}
+
+.room-description {
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.5;
+}
+
+@keyframes cardHover {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-8px);
+    }
+}
+
+@media (max-width: 768px) {
+    .room-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .room-status-ribbon {
+        top: 10px;
+        right: -30px;
+        padding: 4px 30px;
+        font-size: 0.7rem;
+    }
+}
+
+@media print {
+    .room-card {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+
+    .room-status-ribbon {
+        display: none;
+    }
+}

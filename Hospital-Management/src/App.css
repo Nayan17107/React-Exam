@@ -251,8 +251,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem;
-    padding-top: 80px;
     animation: fadeIn 0.5s ease;
 }
 

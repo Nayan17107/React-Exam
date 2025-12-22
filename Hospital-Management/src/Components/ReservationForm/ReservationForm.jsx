@@ -11,7 +11,8 @@ import {
     Col,
     Badge,
     ProgressBar,
-    InputGroup
+    InputGroup,
+    Container
 } from 'react-bootstrap';
 import { addReservationAsync } from '../../Services/Actions/ReservationActions';
 import { getAllRoomsAsync } from '../../Services/Actions/RoomActions';
@@ -59,7 +60,6 @@ const ReservationForm = () => {
         specialRequests: ''
     });
 
-    const [selectedRoom, setSelectedRoom] = useState(null);
     const [formStep, setFormStep] = useState(1);
     const [validationErrors, setValidationErrors] = useState({});
 
@@ -67,11 +67,11 @@ const ReservationForm = () => {
         dispatch(getAllRoomsAsync());
     }, [dispatch]);
 
-    useEffect(() => {
-        if (formData.roomId && rooms.length > 0) {
-            const room = rooms.find(r => r.id === formData.roomId);
-            setSelectedRoom(room);
+    const selectedRoom = React.useMemo(() => {
+        if (formData.roomId && rooms && rooms.length > 0) {
+            return rooms.find(r => r.id === formData.roomId) || null;
         }
+        return null;
     }, [formData.roomId, rooms]);
 
     const handleChange = (e) => {
@@ -170,8 +170,8 @@ const ReservationForm = () => {
         };
 
         try {
-            await dispatch(addReservationAsync(reservationData));
-            navigate('/reservations');
+            const newReservation = await dispatch(addReservationAsync(reservationData));
+            navigate(`/reservations/payment/${newReservation.id}`);
         } catch (error) {
             console.error('Reservation error:', error);
         }
@@ -187,7 +187,7 @@ const ReservationForm = () => {
     };
 
     return (
-        <div className="reservation-form-container">
+        <Container className="reservation-form-container mt-5">
             {/* Progress Steps */}
             <Card className="border-0 shadow-sm mb-4">
                 <Card.Body className="p-4">
@@ -710,7 +710,7 @@ const ReservationForm = () => {
                     )}
                 </div>
             </Form>
-        </div>
+        </Container>
     );
 };
 

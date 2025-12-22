@@ -73,16 +73,36 @@ export const addReservationAsync = (reservationData) => {
             const docRef = await addDoc(collection(db, "reservations"), {
                 ...reservationData,
                 createdAt: new Date().toISOString(),
-                status: 'confirmed'
+                status: 'pending_payment'
             });
 
-            const newReservation = { id: docRef.id, ...reservationData };
+            const newReservation = { id: docRef.id, ...reservationData, createdAt: new Date().toISOString(), status: 'pending_payment' };
             dispatch(addReservation(newReservation));
 
+            // mark room temporarily as unavailable to avoid double-booking while payment pending
             const roomRef = doc(db, "rooms", reservationData.roomId);
             await updateDoc(roomRef, { isAvailable: false });
 
             return newReservation;
+        } catch (error) {
+            dispatch(errorReservations(error.message));
+            throw error;
+        }
+    };
+};
+
+export const getReservationAsync = (id) => {
+    return async (dispatch) => {
+        dispatch(loadingReservations());
+        try {
+            const docRef = doc(db, "reservations", id);
+            const docSnap = await getDoc(docRef);
+
+            if (!docSnap.exists()) throw new Error("Reservation not found");
+
+            const reservation = { id, ...docSnap.data() };
+            dispatch(getReservation(reservation));
+            return reservation;
         } catch (error) {
             dispatch(errorReservations(error.message));
             throw error;
@@ -98,13 +118,22 @@ export const updateReservationAsync = (id, reservationData) => {
             const docSnap = await getDoc(docRef);
             if (!docSnap.exists()) throw new Error("Reservation not found");
 
+            const prev = docSnap.data();
+
             const updatedData = {
-                ...docSnap.data(),
+                ...prev,
                 ...reservationData,
                 updatedAt: new Date().toISOString()
             };
 
             await updateDoc(docRef, updatedData);
+
+            // If reservation is cancelled, make the room available again
+            if (reservationData.status === 'cancelled' && prev.roomId) {
+                const roomRef = doc(db, 'rooms', prev.roomId);
+                await updateDoc(roomRef, { isAvailable: true });
+            }
+
             dispatch(updateReservation({ id, ...updatedData }));
             return { id, ...updatedData };
         } catch (error) {

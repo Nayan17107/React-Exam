@@ -19,7 +19,7 @@ const Register = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { user, isAuthenticated, isLoading, errorMsg, isCreated } = useSelector(state => state.auth);
+    const { isAuthenticated, isLoading, errorMsg, isCreated } = useSelector(state => state.auth);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -78,29 +78,17 @@ const Register = () => {
             return;
         }
 
-        const { confirmPassword, ...userData } = formData;
+        const userData = { ...formData };
+        delete userData.confirmPassword;
         dispatch(signUpAsync(userData));
         setValidated(true);
     };
 
     return (
-        <Container fluid
-            className="d-flex align-items-center justify-content-center"
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100vw',
-                height: '100vh',
-                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                margin: 0,
-                paddingTop: '730px', 
-                overflowY: 'auto',
-                zIndex: 1
-            }}
-        >
+        <Container fluid className="d-flex align-items-center justify-content-center min-vh-100" style={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', margin: 0 }}>
+
             <Row className="w-100 justify-content-center mx-0">
-                <Col xs={12} sm={10} md={8} lg={6} xl={5} className="px-3 px-sm-4 my-5 py-5">
+                <Col xs={12} sm={10} md={8} lg={6} xl={5} className="px-3 px-sm-4 my-4">
                     {/* Back to Home Link - Top */}
                     <div className="mb-4">
                         <Link
