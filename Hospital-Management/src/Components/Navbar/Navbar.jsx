@@ -79,7 +79,7 @@ const CustomNavbar = () => {
                         <FaHotel size={24} className="text-primary" />
                     </div>
                     <div>
-                        <span className="fs-4 fw-bold text-white">LuxuryStay</span>
+                        <span className="fs-4 fw-bold text-white">Luxury Stay</span>
                         <small className="d-block text-light opacity-75" style={{ fontSize: '0.75rem' }}>
                             Hotel Management
                         </small>
