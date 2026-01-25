@@ -8,6 +8,9 @@ import {
     doc
 } from "firebase/firestore";
 import { db } from "../../../Config/firebase.config";
+
+// Email API endpoint
+const EMAIL_API_URL = import.meta.env.VITE_EMAIL_API_URL || 'http://localhost:5000/api/email';
 export const GET_ALL_RESERVATIONS = 'GET_ALL_RESERVATIONS';
 export const GET_RESERVATION = 'GET_RESERVATION';
 export const ADD_RESERVATION = 'ADD_RESERVATION';
@@ -48,6 +51,34 @@ export const errorReservations = (msg) => ({
     payload: msg
 });
 
+// Helper function to send booking confirmation email
+export const sendBookingEmail = async (bookingDetails) => {
+    try {
+        const response = await fetch(`${EMAIL_API_URL}/send-booking-email`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bookingDetails)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.warn('Email sending warning:', data.message);
+            // Don't throw error - let booking succeed even if email fails
+            return { success: false, message: data.message };
+        }
+
+        console.log('✅ Email sent successfully:', data);
+        return { success: true, message: 'Email sent successfully' };
+    } catch (error) {
+        console.warn('⚠️ Failed to send booking email:', error.message);
+        // Don't throw error - let booking succeed even if email fails
+        return { success: false, message: error.message };
+    }
+};
+
 export const getAllReservationsAsync = () => {
     return async (dispatch) => {
         dispatch(loadingReservations());
@@ -82,6 +113,30 @@ export const addReservationAsync = (reservationData) => {
             // mark room temporarily as unavailable to avoid double-booking while payment pending
             const roomRef = doc(db, "rooms", reservationData.roomId);
             await updateDoc(roomRef, { isAvailable: false });
+
+            // Send booking confirmation email
+            if (reservationData.customerEmail && reservationData.roomDetails) {
+                const bookingEmailData = {
+                    customerName: reservationData.customerName || 'Guest',
+                    customerEmail: reservationData.customerEmail,
+                    roomName: reservationData.roomDetails.roomName || 'Room',
+                    roomType: reservationData.roomDetails.roomType || 'Standard',
+                    roomCapacity: reservationData.roomDetails.capacity || 1,
+                    roomPrice: reservationData.roomDetails.price || 0,
+                    roomAmenities: reservationData.roomDetails.amenities || [],
+                    checkInDate: reservationData.checkInDate || 'N/A',
+                    checkOutDate: reservationData.checkOutDate || 'N/A',
+                    numberOfNights: reservationData.numberOfNights || 1,
+                    totalCost: reservationData.totalCost || 0,
+                    reservationId: docRef.id,
+                    hospitalName: 'Hospital Management System',
+                    hospitalPhone: '+1-800-HOSPITAL',
+                    hospitalEmail: 'info@hospital.com'
+                };
+
+                // Send email asynchronously (non-blocking)
+                await sendBookingEmail(bookingEmailData);
+            }
 
             return newReservation;
         } catch (error) {

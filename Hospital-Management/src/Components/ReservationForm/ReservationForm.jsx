@@ -163,8 +163,23 @@ const ReservationForm = () => {
         }
 
         const reservationData = {
-            ...formData,
-            totalPrice: calculateTotal(),
+            customerName: formData.guestName,
+            customerEmail: formData.guestEmail,
+            guestPhone: formData.guestPhone,
+            roomId: formData.roomId,
+            checkInDate: formData.checkIn,
+            checkOutDate: formData.checkOut,
+            numberOfGuests: formData.numberOfGuests,
+            specialRequests: formData.specialRequests,
+            numberOfNights: Math.ceil((new Date(formData.checkOut) - new Date(formData.checkIn)) / (1000 * 60 * 60 * 24)),
+            totalCost: calculateTotal(),
+            roomDetails: selectedRoom ? {
+                roomName: selectedRoom.roomName || selectedRoom.name || 'Room',
+                roomType: selectedRoom.roomType || selectedRoom.type || 'Standard',
+                capacity: selectedRoom.capacity || 1,
+                price: selectedRoom.price || 0,
+                amenities: selectedRoom.amenities || []
+            } : null,
             status: 'confirmed',
             createdAt: new Date().toISOString()
         };
